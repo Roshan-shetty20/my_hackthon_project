@@ -1,0 +1,45 @@
+[
+    {
+        "event_id": "SIM-E01",
+        "offset_minutes": 15,
+        "source": "weather_station_01",
+        "source_type": "simulation",
+        "event_type": "weather_update",
+        "location": "Surat City",
+        "payload": {"description": "Heavy rainfall detected in the central district. Flood risk increasing."}
+    },
+    {
+        "event_id": "SIM-E02",
+        "offset_minutes": 22,
+        "source": "traffic_cam_network",
+        "source_type": "simulation",
+        "event_type": "road_block",
+        "location": "Segment ROAD-002",
+        "payload": {"road_id": "ROAD-002", "description": "Road flooded and impassable."}
+    },
+    {
+        "event_id": "SIM-E03",
+        "offset_minutes": 35,
+        "source": "unit_telemetry",
+        "source_type": "simulation",
+        "event_type": "unit_failure",
+        "location": "Ring Road",
+        "payload": {"unit_id": "AMB-01", "description": "Engine stalled due to waterlogging."}
+    },
+    {
+        "event_id": "SIM-E04",
+        "offset_minutes": 45,
+        "source": "simulated_dispatch_feed",
+        "source_type": "simulation",
+        "event_type": "new_incident",
+        "location": "Adajan",
+        "payload": {
+            "incident_id": "INC-004",
+            "type": "Gas Leak",
+            "severity": 8,
+            "urgency": "HIGH",
+            "required_units": {"rescue_team": 1, "ambulance": 1},
+            "people_affected": 15
+        }
+    }
+]

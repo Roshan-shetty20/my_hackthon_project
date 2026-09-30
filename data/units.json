@@ -1,0 +1,62 @@
+[
+  {
+    "_comment": "SIMULATION DATA",
+    "id": "AMB-01",
+    "type": "ambulance",
+    "status": "AVAILABLE",
+    "capacity": 2,
+    "latitude": 21.1850,
+    "longitude": 72.8250,
+    "capabilities": ["basic_life_support", "transport"]
+  },
+  {
+    "_comment": "SIMULATION DATA",
+    "id": "AMB-02",
+    "type": "ambulance",
+    "status": "AVAILABLE",
+    "capacity": 2,
+    "latitude": 21.1700,
+    "longitude": 72.8400,
+    "capabilities": ["basic_life_support", "transport"]
+  },
+  {
+    "_comment": "SIMULATION DATA",
+    "id": "AMB-03",
+    "type": "ambulance",
+    "status": "AVAILABLE",
+    "capacity": 2,
+    "latitude": 21.1550,
+    "longitude": 72.8350,
+    "capabilities": ["basic_life_support", "transport"]
+  },
+  {
+    "_comment": "SIMULATION DATA",
+    "id": "RES-01",
+    "type": "rescue_team",
+    "status": "AVAILABLE",
+    "capacity": 10,
+    "latitude": 21.1900,
+    "longitude": 72.8150,
+    "capabilities": ["water_rescue", "extraction", "search"]
+  },
+  {
+    "_comment": "SIMULATION DATA",
+    "id": "RES-02",
+    "type": "rescue_team",
+    "status": "AVAILABLE",
+    "capacity": 10,
+    "latitude": 21.1650,
+    "longitude": 72.8200,
+    "capabilities": ["extraction", "search", "rope_rescue"]
+  },
+  {
+    "_comment": "SIMULATION DATA",
+    "id": "AMB-04",
+    "type": "ambulance",
+    "status": "AVAILABLE",
+    "capacity": 2,
+    "latitude": 21.1620,
+    "longitude": 72.8450,
+    "capabilities": ["advanced_life_support", "transport"]
+  }
+]

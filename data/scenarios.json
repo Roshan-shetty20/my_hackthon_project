@@ -1,0 +1,71 @@
+{
+  "_comment": "SIMULATION DATA — Predefined scenario events for demo mode",
+  "demo_sequence": [
+    {
+      "step": 1,
+      "action": "initialize",
+      "description": "Load initial crisis scenario with 3 incidents and 5 units."
+    },
+    {
+      "step": 2,
+      "action": "generate_plans",
+      "description": "Generate 3 candidate plans (Nearest, Severity, Balanced)."
+    },
+    {
+      "step": 3,
+      "action": "stress_test",
+      "description": "Run counterfactual resilience engine on all valid plans."
+    },
+    {
+      "step": 4,
+      "action": "approve",
+      "description": "Approve the recommended plan."
+    },
+    {
+      "step": 5,
+      "action": "breakdown",
+      "target": "AMB-01",
+      "description": "AMB-01 breaks down. Plan invalidated."
+    },
+    {
+      "step": 6,
+      "action": "replan",
+      "description": "Replan with remaining resources. Show plan diff."
+    },
+    {
+      "step": 7,
+      "action": "road_block",
+      "target": "ROAD-01",
+      "description": "Tapi Bridge Road blocked by debris."
+    },
+    {
+      "step": 8,
+      "action": "replan",
+      "description": "Replan with road blocked. Show updated ETAs."
+    },
+    {
+      "step": 9,
+      "action": "new_incident",
+      "incident": {
+        "id": "INC-004",
+        "type": "Gas Leak",
+        "location": "GIDC Pandesara, Surat",
+        "latitude": 21.1480,
+        "longitude": 72.8100,
+        "people_affected": 15,
+        "people_trapped": 3,
+        "vulnerable_people": 5,
+        "life_threat": true,
+        "time_critical": true,
+        "spreading_hazard": true,
+        "required_units": {"rescue_team": 1, "ambulance": 1}
+      },
+      "description": "New critical gas leak incident."
+    },
+    {
+      "step": 10,
+      "action": "replan",
+      "description": "Final replan under maximum stress."
+    }
+  ]
+}

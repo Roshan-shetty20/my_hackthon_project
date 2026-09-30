@@ -1,0 +1,54 @@
+[
+  {
+    "_comment": "SIMULATION DATA — No real emergency data is used.",
+    "id": "INC-001",
+    "type": "Flood Rescue",
+    "location": "Tapi Riverfront, Surat",
+    "latitude": 21.1950,
+    "longitude": 72.8190,
+    "people_affected": 25,
+    "people_trapped": 8,
+    "vulnerable_people": 3,
+    "life_threat": true,
+    "time_critical": true,
+    "spreading_hazard": true,
+    "required_units": {
+      "rescue_team": 2,
+      "ambulance": 1
+    }
+  },
+  {
+    "_comment": "SIMULATION DATA",
+    "id": "INC-002",
+    "type": "Medical Emergency",
+    "location": "Athwa Gate, Surat",
+    "latitude": 21.1750,
+    "longitude": 72.8310,
+    "people_affected": 4,
+    "people_trapped": 0,
+    "vulnerable_people": 2,
+    "life_threat": true,
+    "time_critical": true,
+    "spreading_hazard": false,
+    "required_units": {
+      "ambulance": 1
+    }
+  },
+  {
+    "_comment": "SIMULATION DATA",
+    "id": "INC-003",
+    "type": "Road Accident",
+    "location": "Ring Road, Surat",
+    "latitude": 21.1580,
+    "longitude": 72.8470,
+    "people_affected": 5,
+    "people_trapped": 1,
+    "vulnerable_people": 0,
+    "life_threat": false,
+    "time_critical": true,
+    "spreading_hazard": false,
+    "required_units": {
+      "ambulance": 1
+    }
+  }
+]
