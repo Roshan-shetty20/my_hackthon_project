@@ -6,7 +6,9 @@
         "source_type": "simulation",
         "event_type": "weather_update",
         "location": "Surat City",
-        "payload": {"description": "Heavy rainfall detected in the central district. Flood risk increasing."}
+        "payload": {
+            "description": "Heavy rainfall detected in the central district. Flood risk increasing."
+        }
     },
     {
         "event_id": "SIM-E02",
@@ -15,7 +17,10 @@
         "source_type": "simulation",
         "event_type": "road_block",
         "location": "Segment ROAD-002",
-        "payload": {"road_id": "ROAD-002", "description": "Road flooded and impassable."}
+        "payload": {
+            "road_id": "ROAD-002",
+            "description": "Road flooded and impassable."
+        }
     },
     {
         "event_id": "SIM-E03",
@@ -24,7 +29,10 @@
         "source_type": "simulation",
         "event_type": "unit_failure",
         "location": "Ring Road",
-        "payload": {"unit_id": "AMB-01", "description": "Engine stalled due to waterlogging."}
+        "payload": {
+            "unit_id": "AMB-01",
+            "description": "Engine stalled due to waterlogging."
+        }
     },
     {
         "event_id": "SIM-E04",
@@ -34,12 +42,39 @@
         "event_type": "new_incident",
         "location": "Adajan",
         "payload": {
-            "incident_id": "INC-004",
-            "type": "Gas Leak",
+            "incident_id": "INC-005",
+            "type": "Chemical Spill",
             "severity": 8,
             "urgency": "HIGH",
-            "required_units": {"rescue_team": 1, "ambulance": 1},
-            "people_affected": 15
+            "required_units": {
+                "rescue_team": 2,
+                "ambulance": 1
+            },
+            "people_affected": 15,
+            "lat": 21.1959,
+            "lon": 72.7933
+        }
+    },
+    {
+        "event_id": "SIM-E05",
+        "offset_minutes": 45,
+        "source": "simulated_dispatch_feed",
+        "source_type": "simulation",
+        "event_type": "new_incident",
+        "location": "Udhna",
+        "payload": {
+            "incident_id": "INC-006",
+            "type": "Building Collapse",
+            "severity": 9,
+            "urgency": "CRITICAL",
+            "required_units": {
+                "rescue_team": 1,
+                "ambulance": 2
+            },
+            "people_affected": 30,
+            "people_trapped": 5,
+            "lat": 21.162,
+            "lon": 72.825
         }
     }
 ]

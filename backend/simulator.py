@@ -50,13 +50,19 @@ class DeterministicSimulator:
         """Returns True if there are more events in the stream."""
         return self.current_idx < len(self.events)
 
-    def next_event(self) -> Optional[NormalizedEvent]:
-        """Returns the next deterministic event and advances the pointer."""
+    def next_event_batch(self) -> List[NormalizedEvent]:
+        """Returns all events at the current timestamp/offset and advances the pointer."""
         if not self.has_next():
-            return None
-        ev = self.events[self.current_idx]
-        self.current_idx += 1
-        return ev
+            return []
+        
+        batch = []
+        current_ts = self.events[self.current_idx].timestamp
+        
+        while self.has_next() and self.events[self.current_idx].timestamp == current_ts:
+            batch.append(self.events[self.current_idx])
+            self.current_idx += 1
+            
+        return batch
 
     def current_index(self) -> int:
         return self.current_idx

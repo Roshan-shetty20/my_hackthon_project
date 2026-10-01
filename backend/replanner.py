@@ -97,14 +97,17 @@ def apply_road_block(
     
     # Check if this road block interrupts any active missions
     state.handle_road_block(road_id)
-    
     state.increment_version()
 
-    previous_plan = state.approved_plan or state.recommended_plan
-    state.approved_plan = None
-    state.recommended_plan = None
+    # Check if any mission is STILL interrupted (i.e. rerouting failed)
+    needs_replan = any(m.status == "INTERRUPTED" for m in state.active_missions.values())
 
-    state = _replan(state, history, previous_plan, trigger=f"{road.name} road block")
+    if needs_replan:
+        previous_plan = state.approved_plan or state.recommended_plan
+        state.approved_plan = None
+        state.recommended_plan = None
+        state = _replan(state, history, previous_plan, trigger=f"{road.name} road block (infeasible route)")
+    
     return state
 
 
@@ -173,4 +176,87 @@ def _replan(
         state.plan_diffs.append(diff)
 
     state.log_action("Replanner", f"Replanning complete", trigger)
+    return state
+
+
+def apply_events_batch(
+    state: CrisisState,
+    history: StateHistory,
+    events: list
+) -> CrisisState:
+    from backend.impact import analyze_global_impact
+    from backend.models import UnitStatus, SystemEvent, Incident
+    import uuid
+    
+    # Save base state before applying events
+    history.save(state)
+    
+    # Track what happens for the trigger string
+    event_descs = []
+    
+    # 1. Apply all events to the state
+    for ev in events:
+        if ev.event_type == "unit_failure":
+            unit_id = ev.payload["unit_id"]
+            unit = state.get_unit(unit_id)
+            if unit:
+                old_status = unit.status.value
+                unit.status = UnitStatus.BROKEN_DOWN
+                unit.current_incident = None
+                state.system_events.append(SystemEvent(
+                    id=f"EVT-BRK-{unit_id}", type="breakdown", target_id=unit_id,
+                    description=f"{unit_id} changed from {old_status} to BROKEN_DOWN",
+                    timestamp=datetime.now().isoformat(timespec="seconds")
+                ))
+                state.log_action("System", f"Unit {unit_id} breakdown", f"{old_status} -> BROKEN_DOWN")
+                event_descs.append(f"{unit_id} breakdown")
+                
+        elif ev.event_type == "road_block":
+            road_id = ev.payload["road_id"]
+            road = next((r for r in state.road_conditions if r.id == road_id), None)
+            if road:
+                road.blocked = True
+                road.delay_minutes = 5.0
+                road.reason = "Blocked by debris"
+                state.system_events.append(SystemEvent(
+                    id=f"EVT-RB-{road_id}", type="road_block", target_id=road_id,
+                    description=f"{road.name} blocked",
+                    timestamp=datetime.now().isoformat(timespec="seconds")
+                ))
+                state.log_action("System", f"Road {road.name} blocked", road_id)
+                state.handle_road_block(road_id)
+                event_descs.append(f"{road.name} block")
+                
+        elif ev.event_type == "new_incident":
+            inc_data = ev.payload.copy()
+            if "incident_id" in inc_data: inc_data["id"] = inc_data.pop("incident_id")
+            if "location" not in inc_data: inc_data["location"] = getattr(ev, "location", "Unknown")
+            if "lat" in inc_data: inc_data["latitude"] = inc_data.pop("lat")
+            if "lon" in inc_data: inc_data["longitude"] = inc_data.pop("lon")
+            inc = Incident(**inc_data)
+            assess_incident(inc)
+            state.incidents.append(inc)
+            state.system_events.append(SystemEvent(
+                id=f"EVT-NEW-{inc.id}", type="new_incident", target_id=inc.id,
+                description=f"New {inc.type} at {inc.location}",
+                timestamp=datetime.now().isoformat(timespec="seconds")
+            ))
+            state.log_action("System", f"New incident {inc.id}", inc.type)
+            event_descs.append(f"New incident {inc.id}")
+            
+    state.increment_version()
+    
+    # 2. ONE Global Impact Analysis
+    trigger_str = " + ".join(event_descs) if event_descs else "Batch event"
+    impact = analyze_global_impact(state, events, trigger=trigger_str)
+    state.latest_impact_analysis = impact.model_dump()
+    
+    # 3. ONE Global Replan if required
+    any_interrupted = any(m.status == "INTERRUPTED" for m in state.active_missions.values())
+    if impact.replan_required or any_interrupted:
+        previous_plan = state.approved_plan or state.recommended_plan
+        state.approved_plan = None
+        state.recommended_plan = None
+        state = _replan(state, history, previous_plan, trigger=trigger_str)
+        
     return state

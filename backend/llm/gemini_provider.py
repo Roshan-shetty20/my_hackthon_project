@@ -17,7 +17,7 @@ class GeminiProvider(LLMProvider):
         self.api_key = os.environ.get("GEMINI_API_KEY", "")
 
     def is_available(self) -> bool:
-        return bool(self.api_key)
+        return bool(self.api_key or os.environ.get("GEMINI_API_KEY"))
 
     def generate_explanation(self, prompt: str) -> str:
         if not self.is_available():
@@ -28,13 +28,14 @@ class GeminiProvider(LLMProvider):
             from google.genai import types
             import json
             
-            client = genai.Client(api_key=self.api_key)
+            client = genai.Client(api_key=self.api_key or os.environ.get("GEMINI_API_KEY"))
             
             system_instruction = (
                 "You are the explanation layer of Crisis Command. "
                 "You do not make operational decisions. "
+                "You may NOT allocate resources, dispatch resources, override constraints, change severity directly, change ETA, modify CrisisState, invent available resources, or approve a plan. "
                 "All resource availability, route feasibility, ETA, constraint validation, "
-                "resilience results and plan scores supplied to you are authoritative. "
+                "resilience results and plan scores supplied to you are authoritative deterministic evidence. "
                 "Explain only what the verified evidence supports. "
                 "Never invent missing information. "
                 "If information is missing, explicitly state that it is unknown. "

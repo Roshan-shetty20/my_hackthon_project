@@ -1,3 +1,4 @@
+import backend.models
 """
 Crisis Command — Counterfactual Resilience Engine
 
@@ -75,6 +76,30 @@ def generate_failure_scenarios(plan: Plan, state: CrisisState) -> List[FailureSc
                 )
             )
 
+    
+    # New incident simulation
+    scenarios.append(
+        FailureScenario(
+            scenario_id="SIM_NEW_CRITICAL_INC",
+            type="new_incident",
+            target_id="INC-SIM-999",
+            description="A new CRITICAL incident arrives",
+        )
+    )
+
+    # Severity increase simulation
+    for a in plan.assignments:
+        inc = state.get_incident(a.incident_id)
+        if inc and not inc.status == "RESOLVED":
+            scenarios.append(
+                FailureScenario(
+                    scenario_id=f"SIM_ESCALATE_{a.incident_id}",
+                    type="severity_increase",
+                    target_id=a.incident_id,
+                    description=f"{a.incident_id} severity increases",
+                )
+            )
+
     return scenarios
 
 
@@ -97,6 +122,26 @@ def simulate_failure(
         unit = sim_state.get_unit(scenario.target_id)
         if unit:
             unit.status = UnitStatus.BROKEN_DOWN
+
+    
+    elif scenario.type == "new_incident":
+        from backend.models import Incident, UnitType
+        from backend.severity import assess_incident
+        new_inc = Incident(
+            id=scenario.target_id, type="MEDICAL", location="Simulation",
+            latitude=0.0, longitude=0.0,
+            people_affected=25, life_threat=True
+        )
+        assess_incident(new_inc)
+        sim_state.incidents.append(new_inc)
+
+    elif scenario.type == "severity_increase":
+        inc = sim_state.get_incident(scenario.target_id)
+        if inc:
+            inc.severity = min(10, (inc.severity or 1) + 2)
+            if inc.severity >= 9:
+                
+                inc.urgency = backend.models.UrgencyLevel.CRITICAL
 
     elif scenario.type == "road_block":
         for road in sim_state.road_conditions:
@@ -164,10 +209,10 @@ def simulate_failure(
     for iid in uncovered:
         inc = state.get_incident(iid)
         if inc:
-            if inc.urgency in (UrgencyLevel.CRITICAL, UrgencyLevel.HIGH):
+            if inc.urgency in (backend.models.UrgencyLevel.CRITICAL, backend.models.UrgencyLevel.HIGH):
                 severity_impact = "CRITICAL"
                 break
-            elif inc.urgency == UrgencyLevel.MEDIUM:
+            elif inc.urgency == backend.models.UrgencyLevel.MEDIUM:
                 severity_impact = "MEDIUM"
 
     if not validation.valid and severity_impact == "NONE":

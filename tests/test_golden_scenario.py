@@ -86,7 +86,7 @@ def test_golden_scenario_full_end_to_end(mock_client):
         
         # 5. Simulation Event 1: Weather
         sim = DeterministicSimulator()
-        ev1 = sim.next_event()
+        ev1 = sim.next_event_batch()[0]
         assert ev1.event_type == "weather_update"
         
         from backend.state import StateHistory
@@ -94,7 +94,7 @@ def test_golden_scenario_full_end_to_end(mock_client):
         history = StateHistory()
         
         # 6. Simulation Event 2: Road Block
-        ev2 = sim.next_event()
+        ev2 = sim.next_event_batch()[0]
         assert ev2.event_type == "road_block"
         road_id = ev2.payload["road_id"]
         state = apply_road_block(state, history, road_id)
@@ -107,7 +107,7 @@ def test_golden_scenario_full_end_to_end(mock_client):
         assert road.blocked is True
         
         # 7. Simulation Event 3: Unit Breakdown
-        ev3 = sim.next_event()
+        ev3 = sim.next_event_batch()[0]
         assert ev3.event_type == "unit_failure"
         failed_unit_id = ev3.payload["unit_id"]
         
@@ -120,20 +120,12 @@ def test_golden_scenario_full_end_to_end(mock_client):
         # After breakdown, replanner automatically kicks in and generates new plans
         assert len(state.plan_diffs) > 0
         
-        # 8. Simulation Event 4: New Incident
-        ev4 = sim.next_event()
-        assert ev4.event_type == "new_incident"
-        payload = ev4.payload
-        new_inc = Incident(
-            id=payload["incident_id"],
-            type=payload["type"],
-            location=ev4.location,
-            latitude=0.0,
-            longitude=0.0,
-            severity=payload["severity"],
-            people_affected=payload["people_affected"]
-        )
-        state = apply_new_incident(state, history, new_inc)
+        # 8. Simulation Event 4: Two New Incidents (Simultaneous)
+        batch = sim.next_event_batch()
+        assert len(batch) == 2
+        
+        from backend.replanner import apply_events_batch
+        state = apply_events_batch(state, history, batch)
         v_new_incident = state.version
         assert v_new_incident > v_breakdown
         

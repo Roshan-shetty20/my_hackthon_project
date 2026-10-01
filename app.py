@@ -370,10 +370,16 @@ if "simulator" not in st.session_state:
 if "feed_events" not in st.session_state:
     st.session_state.feed_events = []
 
+if "weather_context" not in st.session_state:
+    from backend.integrations.weather import get_weather
+    # Default to center of our map area
+    st.session_state.weather_context = get_weather(21.175, 72.830)
+
 state: CrisisState = st.session_state.state
 history: StateHistory = st.session_state.history
 simulator: DeterministicSimulator = st.session_state.simulator
 feed_events: list = st.session_state.feed_events
+weather_context = st.session_state.weather_context
 
 
 # ---------------------------------------------------------------------------
@@ -471,12 +477,44 @@ st.markdown('<div style="margin-bottom:8px;"></div>', unsafe_allow_html=True)
 # ---------------------------------------------------------------------------
 
 with st.sidebar:
-    st.markdown("""
+    weather_info = ""
+    weather_title = "🌦 Open-Meteo"
+    if weather_context and weather_context.available:
+        weather_title = "🌦 Open-Meteo"
+        weather_info = f"""
+        Precipitation: {weather_context.precipitation} mm<br/>
+        Rain: {weather_context.rain} mm<br/>
+        Wind: {weather_context.wind_speed} km/h
+        """
+    else:
+        weather_title = "🌦 Open-Meteo <span style='color:#ef4444'>(UNAVAILABLE - FALLBACK)</span>"
+        weather_info = "Using deterministic baseline conditions."
+
+    import os
+    ors_title = "🗺 OpenRouteService"
+    ors_info = "External route context available" if os.environ.get("ORS_API_KEY") else "<span style='color:#ef4444'>ORS_API_KEY missing - EXTERNAL UNAVAILABLE</span>"
+
+    st.markdown(f"""
 <div style="background:#111827;border:1px solid #1e293b;border-radius:6px;padding:12px;margin-bottom:12px;">
-  <div style="font-size:0.65rem;font-weight:700;letter-spacing:0.1em;color:#64748b;margin-bottom:8px;">DATA SOURCE</div>
-  <div style="font-size:0.8rem;color:#22c55e;margin-bottom:4px;">● SIMULATION</div>
-  <div style="font-size:0.8rem;color:#64748b;margin-bottom:4px;">○ OPERATOR INPUT</div>
-  <div style="font-size:0.8rem;color:#64748b;">○ EXTERNAL FEED <span style="font-size:0.6rem;background:#450a0a;color:#fca5a5;padding:1px 4px;border-radius:3px;margin-left:4px;">NOT CONNECTED</span></div>
+  <div style="font-size:0.65rem;font-weight:700;letter-spacing:0.1em;color:#64748b;margin-bottom:8px;">OPERATIONAL CONTEXT</div>
+  
+  <div style="font-size:0.75rem;font-weight:700;color:#94a3b8;margin-top:8px;">EXTERNAL</div>
+  <div style="font-size:0.75rem;color:#3b82f6;margin-top:2px;">{weather_title}</div>
+  <div style="font-size:0.7rem;color:#cbd5e1;padding-left:12px;">{weather_info}</div>
+  
+  <div style="font-size:0.75rem;font-weight:700;color:#94a3b8;margin-top:8px;">ROUTING CONTEXT</div>
+  <div style="font-size:0.75rem;color:#3b82f6;margin-top:2px;">{ors_title}</div>
+  <div style="font-size:0.7rem;color:#cbd5e1;padding-left:12px;">{ors_info}</div>
+
+  <div style="font-size:0.75rem;font-weight:700;color:#94a3b8;margin-top:8px;">LOCAL OPERATIONAL ENGINE</div>
+  <div style="font-size:0.75rem;color:#22c55e;margin-top:2px;">✓ Dijkstra</div>
+  <div style="font-size:0.7rem;color:#cbd5e1;padding-left:12px;">Deterministic route logic active</div>
+
+  <div style="font-size:0.75rem;font-weight:700;color:#94a3b8;margin-top:8px;">SIMULATION</div>
+  <div style="font-size:0.75rem;color:#eab308;margin-top:2px;">🟡 Emergency incidents, Units, Road blocks, Breakdowns</div>
+
+  <div style="font-size:0.75rem;font-weight:700;color:#94a3b8;margin-top:8px;">DERIVED</div>
+  <div style="font-size:0.75rem;color:#60a5fa;margin-top:2px;">🔵 Severity, Allocation, Resilience, Replanning</div>
 </div>
 """, unsafe_allow_html=True)
 
@@ -512,6 +550,17 @@ with st.sidebar:
                         state.log_action("System", "Replanning Triggered", f"Unit failure: {ev.payload['unit_id']}")
                     elif ev.event_type == "new_incident":
                         inc_data = ev.payload.copy()
+                        
+                        # Event Normalizer to Canonical Incident Schema
+                        if "incident_id" in inc_data:
+                            inc_data["id"] = inc_data.pop("incident_id")
+                        if "location" not in inc_data and hasattr(ev, "location"):
+                            inc_data["location"] = ev.location
+                        if "lat" in inc_data:
+                            inc_data["latitude"] = inc_data.pop("lat")
+                        if "lon" in inc_data:
+                            inc_data["longitude"] = inc_data.pop("lon")
+
                         inc = Incident(**inc_data)
                         state = apply_new_incident(state, history, inc)
                         state.log_action("System", "Replanning Triggered", f"New Incident: {inc.id}")

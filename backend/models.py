@@ -49,6 +49,24 @@ class UrgencyLevel(str, Enum):
 # Core domain models
 # ---------------------------------------------------------------------------
 
+
+class IncidentAssessment(BaseModel):
+    incident_type: str
+    severity: int
+    urgency: str
+    confidence: str
+    risk_factors: List[str] = Field(default_factory=list)
+    missing_information: List[str] = Field(default_factory=list)
+    predicted_resource_demand: Dict[str, int] = Field(default_factory=dict)
+
+class EscalationPrediction(BaseModel):
+    current_severity: int
+    escalation_risk: str
+    possible_severity_range: str
+    prediction_horizon: str
+    major_risk_drivers: List[str] = Field(default_factory=list)
+    uncertainty: str
+
 class Incident(BaseModel):
     """An emergency incident requiring response."""
     id: str
@@ -67,6 +85,16 @@ class Incident(BaseModel):
     severity: Optional[int] = None
     urgency: Optional[UrgencyLevel] = None
     timestamp: Optional[str] = None
+    assessment: Optional[IncidentAssessment] = None
+    escalation_prediction: Optional[EscalationPrediction] = None
+    hazard_type: Optional[str] = None
+    hazard_radius: Optional[float] = None
+    wind_conditions: Optional[str] = None
+    road_access: Optional[bool] = None
+    injury_severity: Optional[str] = None
+    fire_explosion_risk: Optional[bool] = None
+
+
 
 
 class Unit(BaseModel):
@@ -175,6 +203,7 @@ class Plan(BaseModel):
     """A candidate response plan."""
     id: str
     strategy_name: str
+    state_version: int = 1
     assignments: List[Assignment] = Field(default_factory=list)
     validation: Optional[ValidationResult] = None
     metrics: Optional[PlanMetrics] = None
@@ -186,6 +215,30 @@ class Plan(BaseModel):
 # ---------------------------------------------------------------------------
 # Resilience models
 # ---------------------------------------------------------------------------
+
+class WeatherContext(BaseModel):
+    """External weather context from Open-Meteo."""
+    source: str = "Open-Meteo"
+    source_type: str = "EXTERNAL"
+    timestamp: str = ""
+    latitude: float = 0.0
+    longitude: float = 0.0
+    precipitation: float = 0.0
+    rain: float = 0.0
+    wind_speed: float = 0.0
+    weather_code: int = 0
+    available: bool = False
+
+class ExternalRouteResult(BaseModel):
+    """External route context from OpenRouteService."""
+    source: str = "OpenRouteService"
+    source_type: str = "EXTERNAL"
+    available: bool = False
+    distance_km: float = 0.0
+    duration_min: float = 0.0
+    geometry: Optional[str] = None
+    alternatives: List[Dict] = Field(default_factory=list)
+    error_reason: str = ""
 
 class FailureScenario(BaseModel):
     """A hypothetical failure scenario for resilience testing."""

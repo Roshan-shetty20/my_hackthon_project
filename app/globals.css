@@ -1,0 +1,152 @@
+@import "tailwindcss";
+
+:root {
+  /* Backgrounds */
+  --bg-app: #020617; /* slate-950 */
+  --bg-surface: #0f172a; /* slate-900 */
+  --bg-card: #1e293b; /* slate-800 */
+  --bg-elevated: #334155; /* slate-700 */
+
+  /* Status Colors: Severity */
+  --status-critical: #ef4444; /* red-500 */
+  --status-high: #f59e0b; /* amber-500 */
+  --status-medium: #eab308; /* yellow-500 */
+  --status-low: #10b981; /* emerald-500 */
+
+  /* Status Colors: Unit */
+  --unit-available: #3b82f6; /* blue-500 */
+  --unit-en-route: #0ea5e9; /* sky-500 */
+  --unit-on-scene: #10b981; /* emerald-500 */
+  --unit-broken-down: #ef4444; /* red-500 */
+
+  /* Typography Scale */
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.25rem;
+  --text-2xl: 1.5rem;
+  --text-3xl: 1.875rem;
+  --text-4xl: 2.25rem;
+}
+
+body {
+  background-color: var(--bg-app);
+  color: #f8fafc;
+  font-family: var(--font-inter, system-ui, sans-serif);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-surface);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--bg-elevated);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #475569; /* slate-600 */
+}
+
+/* Selection */
+::selection {
+  background-color: #3b82f6; /* blue-500 */
+  color: #ffffff;
+}
+
+/* Focus Visible */
+:focus-visible {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+/* Alert Pulse Animation */
+@keyframes alert-pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale(1.05);
+  }
+}
+
+.animate-alert-pulse {
+  animation: alert-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Smooth Transitions */
+.transition-all-smooth {
+  transition-property: all;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 200ms;
+}
+
+/* Custom Utility Classes for Status Badges */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.125rem 0.5rem;
+  border-radius: 0.25rem;
+  font-size: var(--text-xs);
+  font-weight: 500;
+  border: 1px solid transparent;
+}
+
+.badge-critical {
+  background-color: rgba(69, 10, 10, 0.3);
+  color: #f87171;
+  border-color: #7f1d1d;
+}
+
+.badge-high {
+  background-color: rgba(69, 26, 3, 0.3);
+  color: #fbbf24;
+  border-color: #78350f;
+}
+
+.badge-medium {
+  background-color: rgba(66, 32, 6, 0.3);
+  color: #facc15;
+  border-color: #713f12;
+}
+
+.badge-low {
+  background-color: rgba(2, 44, 34, 0.3);
+  color: #34d399;
+  border-color: #064e3b;
+}
+
+.badge-available {
+  background-color: rgba(23, 37, 84, 0.3);
+  color: #60a5fa;
+  border-color: #1e3a8a;
+}
+
+.badge-en-route {
+  background-color: rgba(8, 47, 73, 0.3);
+  color: #38bdf8;
+  border-color: #0c4a6e;
+}
+
+.badge-on-scene {
+  background-color: rgba(2, 44, 34, 0.3);
+  color: #34d399;
+  border-color: #064e3b;
+}
+
+.badge-broken-down {
+  background-color: rgba(69, 10, 10, 0.3);
+  color: #f87171;
+  border-color: #7f1d1d;
+}
